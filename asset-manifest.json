@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/REVV-Leaderboard/static/css/main.8c8b27cf.chunk.css",
-    "main.js": "/REVV-Leaderboard/static/js/main.edff4d93.chunk.js",
-    "main.js.map": "/REVV-Leaderboard/static/js/main.edff4d93.chunk.js.map",
-    "runtime-main.js": "/REVV-Leaderboard/static/js/runtime-main.f8f0f1b3.js",
-    "runtime-main.js.map": "/REVV-Leaderboard/static/js/runtime-main.f8f0f1b3.js.map",
-    "static/js/2.37fbf399.chunk.js": "/REVV-Leaderboard/static/js/2.37fbf399.chunk.js",
-    "static/js/2.37fbf399.chunk.js.map": "/REVV-Leaderboard/static/js/2.37fbf399.chunk.js.map",
-    "static/js/3.f04f2dc3.chunk.js": "/REVV-Leaderboard/static/js/3.f04f2dc3.chunk.js",
-    "static/js/3.f04f2dc3.chunk.js.map": "/REVV-Leaderboard/static/js/3.f04f2dc3.chunk.js.map",
+    "main.js": "/REVV-Leaderboard/static/js/main.716be9d4.chunk.js",
+    "main.js.map": "/REVV-Leaderboard/static/js/main.716be9d4.chunk.js.map",
+    "runtime-main.js": "/REVV-Leaderboard/static/js/runtime-main.57ce2ab4.js",
+    "runtime-main.js.map": "/REVV-Leaderboard/static/js/runtime-main.57ce2ab4.js.map",
+    "static/js/2.4c5db22c.chunk.js": "/REVV-Leaderboard/static/js/2.4c5db22c.chunk.js",
+    "static/js/2.4c5db22c.chunk.js.map": "/REVV-Leaderboard/static/js/2.4c5db22c.chunk.js.map",
+    "static/js/3.5377e8ae.chunk.js": "/REVV-Leaderboard/static/js/3.5377e8ae.chunk.js",
+    "static/js/3.5377e8ae.chunk.js.map": "/REVV-Leaderboard/static/js/3.5377e8ae.chunk.js.map",
     "static/js/4.08221986.chunk.js": "/REVV-Leaderboard/static/js/4.08221986.chunk.js",
     "static/js/4.08221986.chunk.js.map": "/REVV-Leaderboard/static/js/4.08221986.chunk.js.map",
     "static/js/5.30e92eb1.chunk.js": "/REVV-Leaderboard/static/js/5.30e92eb1.chunk.js",
@@ -17,15 +17,15 @@
     "static/js/6.cfe8ac9c.chunk.js.map": "/REVV-Leaderboard/static/js/6.cfe8ac9c.chunk.js.map",
     "index.html": "/REVV-Leaderboard/index.html",
     "static/css/main.8c8b27cf.chunk.css.map": "/REVV-Leaderboard/static/css/main.8c8b27cf.chunk.css.map",
-    "static/js/2.37fbf399.chunk.js.LICENSE.txt": "/REVV-Leaderboard/static/js/2.37fbf399.chunk.js.LICENSE.txt",
-    "static/js/3.f04f2dc3.chunk.js.LICENSE.txt": "/REVV-Leaderboard/static/js/3.f04f2dc3.chunk.js.LICENSE.txt",
+    "static/js/2.4c5db22c.chunk.js.LICENSE.txt": "/REVV-Leaderboard/static/js/2.4c5db22c.chunk.js.LICENSE.txt",
+    "static/js/3.5377e8ae.chunk.js.LICENSE.txt": "/REVV-Leaderboard/static/js/3.5377e8ae.chunk.js.LICENSE.txt",
     "static/js/4.08221986.chunk.js.LICENSE.txt": "/REVV-Leaderboard/static/js/4.08221986.chunk.js.LICENSE.txt",
     "static/js/5.30e92eb1.chunk.js.LICENSE.txt": "/REVV-Leaderboard/static/js/5.30e92eb1.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.f8f0f1b3.js",
-    "static/js/2.37fbf399.chunk.js",
+    "static/js/runtime-main.57ce2ab4.js",
+    "static/js/2.4c5db22c.chunk.js",
     "static/css/main.8c8b27cf.chunk.css",
-    "static/js/main.edff4d93.chunk.js"
+    "static/js/main.716be9d4.chunk.js"
   ]
 }
