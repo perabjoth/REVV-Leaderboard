@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import MaterialTable from "material-table";
 import { forwardRef } from 'react';
 import events from '../data/events.json';
-import session from '../api/session';
 import Popup from 'reactjs-popup';
 import { Card, CardContent, Dialog, Link, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, } from '@material-ui/core';
 
@@ -189,10 +188,15 @@ const columns = [
     {
         title: "View Pizes", field: "", render: rowData => {
             if (new Date(rowData.endTimestamp).getTime() < new Date().getTime()) {
-                return <Popup trigger={<Link href="#">View Prizes</Link>} position="bottom center" >
-                    <Dialog open fullWidth>
-                        <Prizes eventData={rowData} />
-                    </Dialog>
+                return <Popup trigger={<Link href="#">View Prizes</Link>} position="bottom center" closeOnDocumentClick={false} modal closeOnEscape >
+                    {close => {
+                        return (
+                            <Dialog open onClose={close}>
+                                <Prizes eventData={rowData} />
+                            </Dialog>
+                        )
+                    }
+                    }
                 </Popup>
             } else {
                 return <div>{new Date(rowData.startTimestamp).getTime() < new Date().getTime() ? 'In Progress' : 'Upcoming'}...</div>
