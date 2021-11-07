@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 import MaterialTable from "material-table";
 import { forwardRef } from 'react';
 import events from '../data/events.json';
 import Popup from 'reactjs-popup';
-import { Card, CardContent, Dialog, Link, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, } from '@material-ui/core';
+import { Card, CardContent, Dialog, DialogTitle, IconButton, Link, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, } from '@material-ui/core';
 
 
+import CloseIcon from '@material-ui/icons/Close';
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Check from '@material-ui/icons/Check';
@@ -182,6 +184,35 @@ class Prizes extends Component {
     }
 }
 
+const BootstrapDialogTitle = (props) => {
+    const { children, onClose, ...other } = props;
+
+    return (
+        <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+            {children}
+            {onClose ? (
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    style={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            ) : null}
+        </DialogTitle>
+    );
+};
+
+BootstrapDialogTitle.propTypes = {
+    children: PropTypes.node,
+    onClose: PropTypes.func.isRequired,
+};
+
 const columns = [
     { title: "Series", field: "data.series", hidden: true },
     { title: "Name", field: "data.name" },
@@ -192,6 +223,9 @@ const columns = [
                     {close => {
                         return (
                             <Dialog open onClose={close}>
+                                <BootstrapDialogTitle id="customized-dialog-title" onClose={close}>
+                                    Prize Distribution
+                                </BootstrapDialogTitle>
                                 <Prizes eventData={rowData} />
                             </Dialog>
                         )
