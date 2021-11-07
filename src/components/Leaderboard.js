@@ -113,8 +113,8 @@ class Prizes extends Component {
                     }
 
                     let currentPrize = prizeDistribution[i].prize * (halfSplit ? 1 : prizeTotal)
-                    prizeDistribution[i].hiredPrize = (hiredPercentage * currentPrize / peoplePerPrize).toFixed(2)
-                    prizeDistribution[i].ownerPrize = (ownerPercentage * currentPrize / peoplePerPrize).toFixed(2)
+                    prizeDistribution[i].hiredPrize = ((halfSplit ? 1 : hiredPercentage) * currentPrize / peoplePerPrize).toFixed(2)
+                    prizeDistribution[i].ownerPrize = ((halfSplit ? 1 : ownerPercentage) * currentPrize / peoplePerPrize).toFixed(2)
 
                 }
             }
