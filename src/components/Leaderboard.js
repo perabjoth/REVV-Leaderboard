@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import MaterialTable from "material-table";
 import { forwardRef } from 'react';
-import events from '../api/events';
+import events from '../data/events.json';
 import session from '../api/session';
 import Popup from 'reactjs-popup';
 import { Card, CardContent, Dialog, Link, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, } from '@material-ui/core';
@@ -22,6 +22,16 @@ import Remove from '@material-ui/icons/Remove';
 import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
+
+const context = require.context('../data/sessionData', true, /.json$/);
+const allSessions = {};
+context.keys().forEach((key) => {
+    const fileName = key.replace('./', '');
+    const resource = require(`../data/sessionData/${fileName}`);
+    const namespace = fileName.replace('.json', '');
+    allSessions[namespace] = JSON.parse(JSON.stringify(resource));
+
+});
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -68,12 +78,12 @@ class Prizes extends Component {
         let hiredDrivers = prizeData.hired
         let ownerDrivers = prizeData.owner
         let splitLeaderboard = false
-        if(this.props.eventData.data.splitLeaderboard){splitLeaderboard = true}
+        if (this.props.eventData.data.splitLeaderboard) { splitLeaderboard = true }
         if (totalDrivers > 0) {
             let ownerPercentage = (ownerDrivers / totalDrivers)
             let hiredPercentage = (hiredDrivers / totalDrivers)
             let halfSplit = false
-            if(!this.props.eventData.data.dynamicPrizePoolRatio){
+            if (!this.props.eventData.data.dynamicPrizePoolRatio) {
                 ownerPercentage = 0.5
                 hiredPercentage = 0.5
                 halfSplit = true
@@ -97,15 +107,15 @@ class Prizes extends Component {
                         }
                     }
 
-                    if(!prizeDistribution[i].rankString){
+                    if (!prizeDistribution[i].rankString) {
                         prizeDistribution[i].rankString = prizeDistribution[i].rank.toString()
                     }
 
-                    let currentPrize = prizeDistribution[i].prize * (halfSplit ? 1: prizeTotal)
+                    let currentPrize = prizeDistribution[i].prize * (halfSplit ? 1 : prizeTotal)
                     prizeDistribution[i].hiredPrize = (hiredPercentage * currentPrize / peoplePerPrize).toFixed(2)
                     prizeDistribution[i].ownerPrize = (ownerPercentage * currentPrize / peoplePerPrize).toFixed(2)
 
-                } 
+                }
             }
 
             prizeTable = <Table>
@@ -122,7 +132,7 @@ class Prizes extends Component {
 
                             <TableRow>
                                 <TableCell>
-                                    {prizeRow.rankString ? prizeRow.rankString: prizeRow.rank}
+                                    {prizeRow.rankString ? prizeRow.rankString : prizeRow.rank}
                                 </TableCell>
                                 <TableCell>
                                     {splitLeaderboard ? prizeRow.ownerPrize : prizeRow.prize}
@@ -156,15 +166,11 @@ class Prizes extends Component {
             prizeData = JSON.parse(localStorage.getItem(sessionID))
             this.setPrizeData(prizeData);
         } else {
-            session.get(`${sessionID}`).then((response) => {
-                prizeData = response.data
-                if (prizeData.total > 0) {
-                    localStorage.setItem(sessionID, JSON.stringify(prizeData));
-                }
-                this.setPrizeData(prizeData);
-            }).catch((e) => {
-                console.error(e)
-            })
+            prizeData = allSessions[sessionID]
+            if (prizeData.total > 0) {
+                localStorage.setItem(sessionID, JSON.stringify(prizeData));
+            }
+            this.setPrizeData(prizeData);
         }
     }
 
@@ -256,15 +262,12 @@ export default class Leaderboard extends Component {
     BasicTable = async () => {
         let eventData;
         if (needsUpdate() || !localStorage.getItem("events")) {
-            events.get(``).then((response) => {
-                eventData = response.data
-                eventData = formatEventData(eventData);
-                this.setEventData(eventData);
-                this.setEventDataLoaded(true);
-                localStorage.setItem("events", JSON.stringify(eventData));
-            }).catch((e) => {
-                console.error(e)
-            })
+            console.log(events)
+            eventData = events
+            eventData = formatEventData(eventData);
+            this.setEventData(eventData);
+            this.setEventDataLoaded(true);
+            localStorage.setItem("events", JSON.stringify(eventData));
         } else {
             eventData = JSON.parse(localStorage.getItem("events"));
             this.setEventData(eventData);
