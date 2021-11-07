@@ -262,7 +262,6 @@ export default class Leaderboard extends Component {
     BasicTable = async () => {
         let eventData;
         if (needsUpdate() || !localStorage.getItem("events")) {
-            console.log(events)
             eventData = events
             eventData = formatEventData(eventData);
             this.setEventData(eventData);
