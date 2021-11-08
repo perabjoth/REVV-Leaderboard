@@ -74,6 +74,10 @@ class Prizes extends Component {
     generatePrizeTable = (prizeData) => {
         let prizeTable = <div></div>
         let prizeDistribution = this.props.eventData.data.prize
+        let unit = "$"
+        if(this.props.eventData.data.prize_total.toString().includes("REVV")){
+            unit = "REVV"
+        }
         let prizeTotal = this.props.eventData.data.prize_total.toString().replace(/\D/g, '');
         let totalDrivers = prizeData.total
         let hiredDrivers = prizeData.hired
@@ -136,10 +140,10 @@ class Prizes extends Component {
                                     {prizeRow.rankString ? prizeRow.rankString : prizeRow.rank}
                                 </TableCell>
                                 <TableCell>
-                                    {splitLeaderboard ? prizeRow.ownerPrize : prizeRow.prize}
+                                    {splitLeaderboard ? prizeRow.ownerPrize : prizeRow.prize} {unit}
                                 </TableCell>
                                 {splitLeaderboard && <TableCell>
-                                    {prizeRow.hiredPrize}
+                                    {prizeRow.hiredPrize} {unit}
                                 </TableCell>}
                             </TableRow>
                         ))
@@ -243,7 +247,7 @@ const columns = [
     { title: "Track", field: "data.track" },
     { title: "Laps", field: "data.lapCount" },
     { title: "Weather", field: "data.weather" },
-    { title: "Total Prize", field: "data.prize_total" },
+    { title: "Total Prize", field: "data.prize_total_formatted" },
     { title: "id", field: "id", hidden: true },
     { title: "percentagePrizePool", field: "data.percentagePrizePool", hidden: true },
     { title: "dynamicPrizePoolRatio", field: "data.dynamicPrizePoolRatio", hidden: true },
@@ -270,6 +274,11 @@ function formatEventData(eventData) {
     eventData.map(singleDataPoint => {
         singleDataPoint.startTimestamp = new Date(singleDataPoint.startTimestamp)
         singleDataPoint.endTimestamp = new Date(singleDataPoint.endTimestamp)
+        if(singleDataPoint.data.prize_total.toString().includes("REVV")){
+            singleDataPoint.data.prize_total_formatted = singleDataPoint.data.prize_total
+        }else{
+            singleDataPoint.data.prize_total_formatted = singleDataPoint.data.prize_total.toString() + " $"
+        }
         return singleDataPoint
     })
 
