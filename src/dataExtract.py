@@ -17,5 +17,6 @@ for event in eventData:
     if(not exists(sessionDataPath)):
         sessionData = requests.get(session+eventID)
         sessionData = sessionData.json()
-        with open(sessionDataPath, 'w') as s:
-            json.dump(sessionData,s)
+        if(sessionData['total'] > 0):
+            with open(sessionDataPath, 'w') as s:
+                json.dump(sessionData,s)

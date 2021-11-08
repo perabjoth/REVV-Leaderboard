@@ -163,16 +163,17 @@ class Prizes extends Component {
     getPrizeData = async () => {
         let prizeData;
         let sessionID = this.props.eventData.id.toUpperCase();
-        if (localStorage.getItem(sessionID)) {
-            prizeData = JSON.parse(localStorage.getItem(sessionID))
-            this.setPrizeData(prizeData);
-        } else {
-            prizeData = allSessions[sessionID]
-            if (prizeData.total > 0) {
-                localStorage.setItem(sessionID, JSON.stringify(prizeData));
-            }
-            this.setPrizeData(prizeData);
-        }
+        // if (localStorage.getItem(sessionID)) {
+        //     prizeData = JSON.parse(localStorage.getItem(sessionID))
+        //     this.setPrizeData(prizeData);
+        // } else {
+        prizeData = allSessions[sessionID]
+        
+        // if (prizeData.total > 0) {
+        //     localStorage.setItem(sessionID, JSON.stringify(prizeData));
+        // }
+        this.setPrizeData(prizeData);
+        // }
     }
 
     componentDidMount() {
@@ -249,21 +250,21 @@ const columns = [
     { title: "splitLeaderboard", field: "data.splitLeaderboard", hidden: true },
 ];
 
-function needsUpdate() {
-    const expirationDuration = 1000 * 60 * 60 * 24; // 12 hours
+// function needsUpdate() {
+//     const expirationDuration = 1000 * 60 * 60 * 24; // 12 hours
 
-    const prevAccepted = localStorage.getItem("accepted");
-    const currentTime = new Date().getTime();
+//     const prevAccepted = localStorage.getItem("accepted");
+//     const currentTime = new Date().getTime();
 
-    const notAccepted = prevAccepted === undefined;
-    const prevAcceptedExpired = prevAccepted !== undefined && currentTime - prevAccepted > expirationDuration;
-    if (notAccepted || prevAcceptedExpired) {
-        localStorage.setItem("accepted", currentTime);
-        return true;
-    }
+//     const notAccepted = prevAccepted === undefined;
+//     const prevAcceptedExpired = prevAccepted !== undefined && currentTime - prevAccepted > expirationDuration;
+//     if (notAccepted || prevAcceptedExpired) {
+//         localStorage.setItem("accepted", currentTime);
+//         return true;
+//     }
 
-    return false;
-}
+//     return false;
+// }
 
 function formatEventData(eventData) {
     eventData.map(singleDataPoint => {
@@ -299,17 +300,17 @@ export default class Leaderboard extends Component {
 
     BasicTable = async () => {
         let eventData;
-        if (needsUpdate() || !localStorage.getItem("events")) {
-            eventData = events
-            eventData = formatEventData(eventData);
-            this.setEventData(eventData);
-            this.setEventDataLoaded(true);
-            localStorage.setItem("events", JSON.stringify(eventData));
-        } else {
-            eventData = JSON.parse(localStorage.getItem("events"));
-            this.setEventData(eventData);
-            this.setEventDataLoaded(true);
-        }
+        // if (needsUpdate() || !localStorage.getItem("events")) {
+        eventData = events
+        eventData = formatEventData(eventData);
+        this.setEventData(eventData);
+        this.setEventDataLoaded(true);
+        // localStorage.setItem("events", JSON.stringify(eventData));
+        // } else {
+        //     eventData = JSON.parse(localStorage.getItem("events"));
+        //     this.setEventData(eventData);
+        //     this.setEventDataLoaded(true);
+        // }
     };
 
     componentDidMount() {
