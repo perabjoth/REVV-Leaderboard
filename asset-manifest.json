@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/REVV-Leaderboard/static/css/main.3a4e0354.chunk.css",
-    "main.js": "/REVV-Leaderboard/static/js/main.57d778e7.chunk.js",
-    "main.js.map": "/REVV-Leaderboard/static/js/main.57d778e7.chunk.js.map",
+    "main.js": "/REVV-Leaderboard/static/js/main.90dd23e4.chunk.js",
+    "main.js.map": "/REVV-Leaderboard/static/js/main.90dd23e4.chunk.js.map",
     "runtime-main.js": "/REVV-Leaderboard/static/js/runtime-main.37059584.js",
     "runtime-main.js.map": "/REVV-Leaderboard/static/js/runtime-main.37059584.js.map",
     "static/js/2.a1903ec2.chunk.js": "/REVV-Leaderboard/static/js/2.a1903ec2.chunk.js",
@@ -26,6 +26,6 @@
     "static/js/runtime-main.37059584.js",
     "static/js/2.a1903ec2.chunk.js",
     "static/css/main.3a4e0354.chunk.css",
-    "static/js/main.57d778e7.chunk.js"
+    "static/js/main.90dd23e4.chunk.js"
   ]
 }
