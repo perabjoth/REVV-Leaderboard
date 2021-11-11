@@ -4,7 +4,7 @@ import MaterialTable from "material-table";
 import { forwardRef } from 'react';
 import events from '../data/events.json';
 import Popup from 'reactjs-popup';
-import { Card, CardContent, Dialog, DialogTitle, IconButton, Link, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, } from '@material-ui/core';
+import { Button, Card, CardContent, Dialog, DialogTitle, Grid, IconButton, Link, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@material-ui/core';
 
 
 import CloseIcon from '@material-ui/icons/Close';
@@ -24,13 +24,23 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 
-const context = require.context('../data/sessionData', true, /.json$/);
+const sessionContext = require.context('../data/sessionData', true, /.json$/);
 const allSessions = {};
-context.keys().forEach((key) => {
+sessionContext.keys().forEach((key) => {
     const fileName = key.replace('./', '');
     const resource = require(`../data/sessionData/${fileName}`);
     const namespace = fileName.replace('.json', '');
     allSessions[namespace] = JSON.parse(JSON.stringify(resource));
+
+});
+
+const leaderboardContext = require.context('../data/leaderboardData', true, /.json$/);
+const allleaderboards = {};
+leaderboardContext.keys().forEach((key) => {
+    const fileName = key.replace('./', '');
+    const resource = require(`../data/leaderboardData/${fileName}`);
+    const namespace = fileName.replace('.json', '');
+    allleaderboards[namespace] = JSON.parse(JSON.stringify(resource));
 
 });
 
@@ -54,6 +64,94 @@ const tableIcons = {
     ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 
+function generatePrizeTable(prizeData, prizeDistribution, splitLeaderboard, totalPrizeString, dynamicPrizePoolRatio) {
+    let prizeTable = <div></div>
+    let unit = "$"
+    if (totalPrizeString.includes("REVV")) {
+        unit = "REVV"
+    }
+    let prizeTotal = totalPrizeString.replace(/\D/g, '');
+    let totalDrivers = prizeData.total
+    let hiredDrivers = prizeData.hired
+    let ownerDrivers = prizeData.owner
+    if (totalDrivers > 0) {
+        let ownerPercentage = (ownerDrivers / totalDrivers)
+        let hiredPercentage = (hiredDrivers / totalDrivers)
+        let halfSplit = false
+        if (!dynamicPrizePoolRatio) {
+            ownerPercentage = 0.5
+            hiredPercentage = 0.5
+            halfSplit = true
+        }
+
+        let rankRange = false
+        for (const i in prizeDistribution) {
+            prizeDistribution[i].unit = unit
+            let peoplePerPrize = 1
+            if (prizeDistribution[i].prize < 1 || halfSplit) {
+                if (i < prizeDistribution.length - 1) {
+                    let j = parseInt(i) + 1
+                    if (prizeDistribution[j].rank - prizeDistribution[i].rank > 1) {
+                        rankRange = true
+                        prizeDistribution[i].rankString = prizeDistribution[i].rank.toString() + ' - ' + (prizeDistribution[j].rank - 1).toString()
+                        peoplePerPrize = parseInt(prizeDistribution[j].rank) - parseInt(prizeDistribution[i].rank)
+                    }
+                } else {
+                    if (rankRange) {
+                        prizeDistribution[i].rankString = prizeDistribution[i].rank.toString() + '+*'
+                        peoplePerPrize = 3000
+                    }
+                }
+
+                if (!prizeDistribution[i].rankString) {
+                    prizeDistribution[i].rankString = prizeDistribution[i].rank.toString()
+                }
+
+                let currentPrize = prizeDistribution[i].prize * (halfSplit ? 1 : prizeTotal)
+                prizeDistribution[i].hiredPrize = ((halfSplit ? 1 : hiredPercentage) * currentPrize / peoplePerPrize).toFixed(2)
+                prizeDistribution[i].ownerPrize = ((halfSplit ? 1 : ownerPercentage) * currentPrize / peoplePerPrize).toFixed(2)
+
+            }
+        }
+
+        prizeTable = <Table>
+            <TableHead>
+                <TableRow>
+                    <TableCell>Rank</TableCell>
+                    <TableCell>Driver Prize {splitLeaderboard && '(' + (ownerPercentage * 100).toFixed(2) + '%)'}</TableCell>
+                    {splitLeaderboard && <TableCell>Hired Prize ({(hiredPercentage * 100).toFixed(2)}%)</TableCell>}
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {
+                    prizeDistribution.map((prizeRow) => (
+
+                        <TableRow>
+                            <TableCell>
+                                {prizeRow.rankString ? prizeRow.rankString : prizeRow.rank}
+                            </TableCell>
+                            <TableCell>
+                                {splitLeaderboard ? prizeRow.ownerPrize : prizeRow.prize} {unit}
+                            </TableCell>
+                            {splitLeaderboard && <TableCell>
+                                {prizeRow.hiredPrize} {unit}
+                            </TableCell>}
+                        </TableRow>
+                    ))
+                }
+            </TableBody>
+        </Table>
+    } else {
+        prizeTable = <Card sx={{ minWidth: 275 }}>
+            <CardContent align="center">
+                <h1>Prize Data Not Available</h1>
+            </CardContent>
+        </Card>
+    }
+
+    return prizeTable
+}
+
 class Prizes extends Component {
     constructor(props) {
         super(props);
@@ -68,116 +166,28 @@ class Prizes extends Component {
             prizeData: value
         });
 
-        this.generatePrizeTable(value)
+        this.generatePrizeTableContent(value,
+            this.props.eventData.data.prize,
+            this.props.eventData.data.splitLeaderboard,
+            this.props.eventData.data.prize_total.toString(),
+            this.props.eventData.data.dynamicPrizePoolRatio)
     }
 
-    generatePrizeTable = (prizeData) => {
-        let prizeTable = <div></div>
-        let prizeDistribution = this.props.eventData.data.prize
-        let unit = "$"
-        if(this.props.eventData.data.prize_total.toString().includes("REVV")){
-            unit = "REVV"
-        }
-        let prizeTotal = this.props.eventData.data.prize_total.toString().replace(/\D/g, '');
-        let totalDrivers = prizeData.total
-        let hiredDrivers = prizeData.hired
-        let ownerDrivers = prizeData.owner
-        let splitLeaderboard = false
-        if (this.props.eventData.data.splitLeaderboard) { splitLeaderboard = true }
-        if (totalDrivers > 0) {
-            let ownerPercentage = (ownerDrivers / totalDrivers)
-            let hiredPercentage = (hiredDrivers / totalDrivers)
-            let halfSplit = false
-            if (!this.props.eventData.data.dynamicPrizePoolRatio) {
-                ownerPercentage = 0.5
-                hiredPercentage = 0.5
-                halfSplit = true
-            }
+    generatePrizeTableContent(prizeData, prizeDistribution, splitLeaderboard, totalPrizeString, dynamicPrizePoolRatio) {
+        this.setPrizeTable(generatePrizeTable(prizeData, prizeDistribution, splitLeaderboard, totalPrizeString, dynamicPrizePoolRatio))
+    }
 
-            let rankRange = false
-            for (const i in prizeDistribution) {
-                let peoplePerPrize = 1
-                if (prizeDistribution[i].prize < 1 || halfSplit) {
-                    if (i < prizeDistribution.length - 1) {
-                        let j = parseInt(i) + 1
-                        if (prizeDistribution[j].rank - prizeDistribution[i].rank > 1) {
-                            rankRange = true
-                            prizeDistribution[i].rankString = prizeDistribution[i].rank.toString() + ' - ' + (prizeDistribution[j].rank - 1).toString()
-                            peoplePerPrize = parseInt(prizeDistribution[j].rank) - parseInt(prizeDistribution[i].rank)
-                        }
-                    } else {
-                        if (rankRange) {
-                            prizeDistribution[i].rankString = prizeDistribution[i].rank.toString() + '+*'
-                            peoplePerPrize = 3000
-                        }
-                    }
-
-                    if (!prizeDistribution[i].rankString) {
-                        prizeDistribution[i].rankString = prizeDistribution[i].rank.toString()
-                    }
-
-                    let currentPrize = prizeDistribution[i].prize * (halfSplit ? 1 : prizeTotal)
-                    prizeDistribution[i].hiredPrize = ((halfSplit ? 1 : hiredPercentage) * currentPrize / peoplePerPrize).toFixed(2)
-                    prizeDistribution[i].ownerPrize = ((halfSplit ? 1 : ownerPercentage) * currentPrize / peoplePerPrize).toFixed(2)
-
-                }
-            }
-
-            prizeTable = <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Rank</TableCell>
-                        <TableCell>Driver Prize {splitLeaderboard && '(' + (ownerPercentage * 100).toFixed(2) + '%)'}</TableCell>
-                        {splitLeaderboard && <TableCell>Hired Prize ({(hiredPercentage * 100).toFixed(2)}%)</TableCell>}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {
-                        prizeDistribution.map((prizeRow) => (
-
-                            <TableRow>
-                                <TableCell>
-                                    {prizeRow.rankString ? prizeRow.rankString : prizeRow.rank}
-                                </TableCell>
-                                <TableCell>
-                                    {splitLeaderboard ? prizeRow.ownerPrize : prizeRow.prize} {unit}
-                                </TableCell>
-                                {splitLeaderboard && <TableCell>
-                                    {prizeRow.hiredPrize} {unit}
-                                </TableCell>}
-                            </TableRow>
-                        ))
-                    }
-                </TableBody>
-            </Table>
-        } else {
-            prizeTable = <Card sx={{ minWidth: 275 }}>
-                <CardContent align="center">
-                    <h1>Prize Data Not Available</h1>
-                </CardContent>
-            </Card>
-        }
-
-
+    setPrizeTable(value) {
         this.setState({
-            prizeTable: prizeTable
+            prizeTable: value
         })
     }
 
     getPrizeData = async () => {
         let prizeData;
         let sessionID = this.props.eventData.id.toUpperCase();
-        // if (localStorage.getItem(sessionID)) {
-        //     prizeData = JSON.parse(localStorage.getItem(sessionID))
-        //     this.setPrizeData(prizeData);
-        // } else {
         prizeData = allSessions[sessionID]
-        
-        // if (prizeData.total > 0) {
-        //     localStorage.setItem(sessionID, JSON.stringify(prizeData));
-        // }
         this.setPrizeData(prizeData);
-        // }
     }
 
     componentDidMount() {
@@ -223,7 +233,9 @@ const columns = [
     { title: "Name", field: "data.name" },
     {
         title: "View Pizes", field: "", render: rowData => {
-            if (new Date(rowData.endTimestamp).getTime() < new Date().getTime()) {
+            if (rowData.walletPrize) {
+                return <div>{rowData.walletPrize}</div>
+            } else if (new Date(rowData.endTimestamp).getTime() < new Date().getTime()) {
                 return <Popup trigger={<Link href="#">View Prizes</Link>} position="bottom center" closeOnDocumentClick={false} modal closeOnEscape >
                     {close => {
                         return (
@@ -254,29 +266,14 @@ const columns = [
     { title: "splitLeaderboard", field: "data.splitLeaderboard", hidden: true },
 ];
 
-// function needsUpdate() {
-//     const expirationDuration = 1000 * 60 * 60 * 24; // 12 hours
-
-//     const prevAccepted = localStorage.getItem("accepted");
-//     const currentTime = new Date().getTime();
-
-//     const notAccepted = prevAccepted === undefined;
-//     const prevAcceptedExpired = prevAccepted !== undefined && currentTime - prevAccepted > expirationDuration;
-//     if (notAccepted || prevAcceptedExpired) {
-//         localStorage.setItem("accepted", currentTime);
-//         return true;
-//     }
-
-//     return false;
-// }
 
 function formatEventData(eventData) {
     eventData.map(singleDataPoint => {
         singleDataPoint.startTimestamp = new Date(singleDataPoint.startTimestamp)
         singleDataPoint.endTimestamp = new Date(singleDataPoint.endTimestamp)
-        if(singleDataPoint.data.prize_total.toString().includes("REVV")){
+        if (singleDataPoint.data.prize_total.toString().includes("REVV")) {
             singleDataPoint.data.prize_total_formatted = singleDataPoint.data.prize_total
-        }else{
+        } else {
             singleDataPoint.data.prize_total_formatted = singleDataPoint.data.prize_total.toString() + " $"
         }
         return singleDataPoint
@@ -296,6 +293,8 @@ export default class Leaderboard extends Component {
         this.state = {
             eventData: undefined,
             eventDataLoaded: false,
+            walletAddress: '',
+            walletPositions: undefined
         };
     }
 
@@ -308,39 +307,142 @@ export default class Leaderboard extends Component {
     }
 
     BasicTable = async () => {
-        let eventData;
-        // if (needsUpdate() || !localStorage.getItem("events")) {
-        eventData = events
+        let eventData = events
         eventData = formatEventData(eventData);
         this.setEventData(eventData);
         this.setEventDataLoaded(true);
-        // localStorage.setItem("events", JSON.stringify(eventData));
-        // } else {
-        //     eventData = JSON.parse(localStorage.getItem("events"));
-        //     this.setEventData(eventData);
-        //     this.setEventDataLoaded(true);
-        // }
     };
 
     componentDidMount() {
         this.BasicTable();
     }
 
+    setWalletAddress(value) {
+        this.setState({ walletAddress: value })
+    }
+
+    filterWallet(entry) {
+        return entry.wallet === this.walletAddress
+    }
+
+    getWalletEntry(currentLeaderboard, owner, hired, split, eventId) {
+        let driverEntry = undefined
+        if (currentLeaderboard) {
+            driverEntry = currentLeaderboard.entries.filter((entry) => entry.wallet.toUpperCase() === this.state.walletAddress.toUpperCase())
+            if (driverEntry.length > 0) {
+                driverEntry = driverEntry[0]
+                driverEntry.owner = owner
+                driverEntry.hired = hired
+                driverEntry.split = split
+                return driverEntry
+            }
+        }
+
+        return undefined
+    }
+
+    setWalletPosition(walletPositions) {
+        this.setState({walletPositions: walletPositions})
+        this.state.eventData.forEach(event => {
+            if (allSessions[event.id.toUpperCase()] && walletPositions[event.id]) {
+                let currentWalletPosition = walletPositions[event.id]
+                let currentRank = currentWalletPosition.rank
+                console.log(currentWalletPosition)
+                generatePrizeTable(allSessions[event.id.toUpperCase()],
+                    event.data.prize,
+                    event.data.splitLeaderboard,
+                    event.data.prize_total.toString(),
+                    event.data.dynamicPrizePoolRatio)
+                let prize = event.data.prize
+                let walletPrize = undefined
+                for (let index = 0; index < prize.length; index++) {
+                    const prizeRank = prize[index];
+                    const nextIndex = index + 1
+                    if (nextIndex === prize.length) {
+                        walletPrize = prizeRank
+                        break;
+                    } else if (currentRank >= prizeRank.rank && currentRank <= prize[nextIndex].rank) {
+                        walletPrize = prizeRank
+                        break;
+                    }
+                }
+
+                event.walletPrize = undefined
+
+                if (walletPrize) {
+                    let finalPrize = ''
+                    console.log(walletPrize)
+                    if (currentWalletPosition.split) {
+                        finalPrize = currentWalletPosition.hired ? walletPrize.hiredPrize : walletPrize.ownerPrize
+                    } else {
+                        finalPrize = walletPrize.prize
+                    }
+
+                    event.walletPrize = "Rank: " + currentRank.toString() + " - Prize: " + finalPrize.toString() + " " + walletPrize.unit
+                }
+            }
+        });
+
+    }
+
+    getWalletPositions() {
+        let walletPositions = {};
+        events.forEach(event => {
+            let leaderboardPrefix = 'GAME_SESSION_ALPHA_A_'
+            if (event.data.splitLeaderboard) {
+                let ownerLeaderboard = leaderboardPrefix + event.id.toUpperCase() + '_SPLIT_OWNER'
+                let hiredLeaderboard = leaderboardPrefix + event.id.toUpperCase() + '_SPLIT_HIRED'
+                let ownerLeaderboardData = allleaderboards[ownerLeaderboard]
+                let hiredLeaderboardData = allleaderboards[hiredLeaderboard]
+                let ownerEntry = this.getWalletEntry(ownerLeaderboardData, true, false, true)
+                let hiredEntry = this.getWalletEntry(hiredLeaderboardData, false, true, true)
+                if (ownerEntry) {
+                    walletPositions[event.id] = ownerEntry
+                } else if (hiredEntry) {
+                    walletPositions[event.id] = hiredEntry
+                }
+            } else {
+                let leaderboard = leaderboardPrefix + event.id.toUpperCase()
+                let ownerEntry = this.getWalletEntry(allleaderboards[leaderboard], true, false, false)
+                if (ownerEntry) {
+                    walletPositions[event.id] = ownerEntry
+                }
+            }
+        });
+
+        this.setWalletPosition(walletPositions)
+    }
+
     render() {
         return (
-            <div>
-                <MaterialTable
-                    title="REVV Leaderboards"
-                    columns={columns}
-                    data={this.state.eventData}
-                    icons={tableIcons}
-                    isLoading={!this.state.eventDataLoaded}
-                    options={{
-                        pageSize: 10,
-                        pageSizeOptions: [5, 10, 20, { value: this.state.eventData ? parseInt(this.state.eventData.length) : 0, label: 'All' }],
-                    }}
-                />
-            </div>
+            <Grid container spacing={3} >
+                <Grid item xs={12}>
+                    <TextField
+                        id="wallet-address"
+                        label="Wallet Address"
+                        variant="outlined"
+                        fullWidth
+                        onChange={(e) => this.setWalletAddress(e.target.value)}
+                    />
+                </Grid>
+                <Grid item xs={12} alignContent="center" alignItems="center">
+                    <Button color="primary" fullWidth variant="contained" onClick={() => this.getWalletPositions()} >Get Wallet List</Button>
+                </Grid>
+                <Grid item xs={12}>
+                    <MaterialTable
+                        title="REVV Leaderboards"
+                        columns={columns}
+                        data={this.state.eventData}
+                        icons={tableIcons}
+                        isLoading={!this.state.eventDataLoaded}
+                        options={{
+                            pageSize: 10,
+                            pageSizeOptions: [5, 10, 20, { value: this.state.eventData ? parseInt(this.state.eventData.length) : 0, label: 'All' }],
+                        }}
+                    />
+                </Grid>
+            </Grid>
+
         )
     }
 }
