@@ -23,7 +23,8 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container className="mainDiv">
-        <Leaderboard />
+        <h1>Leaderabord has moved to the REVV Suite:</h1>
+        <h2><a href="https://perabjoth.github.io/REVV-Suite/#/Leaderboard" style={{color: 'red'}}>https://perabjoth.github.io/REVV-Suite/#/Leaderboard</a></h2>
       </Container>
     </ThemeProvider>
   );
